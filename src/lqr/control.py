@@ -69,8 +69,8 @@ class Quad_control():
         """
         
         state =np.matrix( [x, xdot,theta,thetadot] ) #positive x needs negative force, others just positive
-        
-        print('K :', self.K)
+        print('K: ', self.K)
+        print('K :', np.shape(self.K) )
         
         state1 = np.matrix(	[
             [-state[0,0]],
@@ -81,7 +81,6 @@ class Quad_control():
         # F = self.K*state.transpose()
         F = np.dot(self.K,state.transpose())
 
-        
         # F = self.K*state1
 
         print('F: ', F)
@@ -108,6 +107,110 @@ class Quad_control():
         # print('error: ' , error.shape())
         # F = self.K*error
         # print('F:  ', F.shape())
+    
+    
+    def return_K(self):
+        """
+        Args:
+            None
+        Returns:
+            K (double 4x1 matrix): gain matrix
+        
+        """
+        try:
+            print(self.K)
+        except:
+            print('K not defined')
+            
+class Quad_control_force():
+ 
+    def __init__(self,m_cart=0, m_pole=0  , g=0, l=0):
+        """
+        LQR controller
+        Args: 
+            cart mass
+            ball mass
+            gravitational constant
+            rod + ball radius 
+        """   
+        self.m_cart = m_cart
+        self.m_pole = m_pole
+        
+        A = np.matrix([
+            [0,1,0,0],[0,0,g*m_pole/m_cart,0],[0,0,0,1],[0,0,(m_pole*g+m_cart*g)/(m_cart*l),0]    
+        ])
+        
+        B = np.matrix(
+            [
+                [0],
+                [1/m_cart],
+                [0],
+                [1/(m_cart*l)]
+            ]
+            
+        )
+        
+        
+        Q = 0.01*np.asmatrix(np.eye(4))
+        # Q[0,0] = 1 #0.0001 #10
+        # Q[1,1] = 1
+        # Q[2,2] = 1
+        # Q[3,3] = 1
+        
+        # R = np.asmatrix([1])
+        R = np.asmatrix([0.01])
+        
+        self.K,self.S,self.E = lqr(A,B,Q,R)
+        
+        
+        
+        
+        
+        
+    def compute_cmd(self,x,xdot,theta,thetadot):
+        """_summary_
+
+        Args:
+            x (float): cart position
+            xdot (float): cart velocity
+            theta (float): rod angle
+            thetadot (float): rod angular velocity
+
+        Returns:
+            Force (x direction)
+        """
+        
+        state = np.matrix( [-x + 1, -xdot,theta,thetadot] ) #positive x needs negative force, others just positive
+        f = np.dot(self.K,state.transpose())
+        
+        
+        print('inside control class f: ')
+        print(f)
+        print(type(f))
+        
+        print('state: ')
+        print(state)
+        print(type(state))
+        
+        # print('x: ')
+        # print(x)
+        # print(type(x))
+        
+        # print('xdot: ')
+        # print(xdot)
+        # print(type(xdot))
+        
+        # print('theta: ')
+        # print(theta)
+        # print(type(theta))
+        
+        # print('thetadot: ')
+        # print(thetadot)
+        # print(type(thetadot))
+        
+        
+        return f
+        
     
     
     def return_K(self):

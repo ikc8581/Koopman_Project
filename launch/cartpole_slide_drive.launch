@@ -1,19 +1,13 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="mode" default="drive" doc="ccm_vel source"/>
+    <arg name="mode" default="control" doc="control aproach"/>
 
     <rosparam file="$(find cartpole)/config/cart_params.yaml" command="load" />
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-
-   
-    <group if="$(eval mode=='drive')">
-        <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/>
-    </group>
-
-    
+  
     <group if="$(eval mode=='control')">
-        <node pkg="cartpole" type="control_norm" name="control_norm" output="screen">
+        <node pkg="cartpole" type="control_norm_force" name="control_norm_force" output="screen">
             
         </node>
     </group>
@@ -26,14 +20,14 @@
    
     <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/> 
 
-    <param name="robot_description" command="$(find xacro)/xacro $(find cartpole)/urdf/cartpolebot.urdf.xacro" />
+    <param name="robot_description" command="$(find xacro)/xacro $(find cartpole)/urdf/cartpoleslide.urdf.xacro" />
 
     <include file="$(find joint_state_controller)/joint_state_controller.launch">
 
   </include>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find cartpole)/world/cartpole.world"/>
+        <arg name="world_name" value="$(find cartpole)/world/simple.world"/>
         <arg name="paused" value="true"/>
         <arg name="use_sim_time" value="true"/>
   </include>
@@ -44,6 +38,6 @@
     <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cartpole)/cartpole_view.rviz" required="true"/> -->
 
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
-    args="-urdf -param robot_description -model cartpolebot -z 0.05" />
+    args="-urdf -param robot_description -model cartpoleslide -z 0.1" />
 
 </launch>

@@ -66,7 +66,7 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <gravity>0 0 -10</gravity>
+    <gravity>0 0 -9.8</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
     <atmosphere type='adiabatic'/>
     <physics type='ode'>
@@ -88,20 +88,10 @@
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
     <state world_name='default'>
-      <sim_time>786 663000000</sim_time>
+      <sim_time>95 924000000</sim_time>
       <real_time>0 0</real_time>
-      <wall_time>1649537644 429467390</wall_time>
+      <wall_time>1649605620 270569502</wall_time>
       <iterations>0</iterations>
-      <model name='asphalt_plane'>
-        <pose>0.802685 0.379481 0 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>0.802685 0.379481 0 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
       <model name='ground_plane'>
         <pose>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
@@ -118,54 +108,10 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>1.51488 -8.13299 6.69404 0 0.46561 1.53173</pose>
+        <pose>1.12286 -0.037749 0.046807 0 -0.076357 3.11219</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
-    <model name='asphalt_plane'>
-      <static>1</static>
-      <link name='link'>
-        <collision name='collision'>
-          <geometry>
-            <box>
-              <size>20 20 0.1</size>
-            </box>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <cast_shadows>0</cast_shadows>
-          <geometry>
-            <box>
-              <size>20 20 0.1</size>
-            </box>
-          </geometry>
-          <material>
-            <script>
-              <uri>model://asphalt_plane/materials/scripts</uri>
-              <uri>model://asphalt_plane/materials/textures</uri>
-              <name>vrc/asphalt</name>
-            </script>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <pose>0.802685 0.379481 0 0 -0 0</pose>
-    </model>
   </world>
 </sdf>

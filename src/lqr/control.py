@@ -180,7 +180,7 @@ class Quad_control_force():
             Force (x direction)
         """
         
-        state = np.matrix( [-x + 1, -xdot,theta,thetadot] ) #positive x needs negative force, others just positive
+        state = np.matrix( [-x + 2, -xdot,theta,thetadot] ) #positive x needs negative force, others just positive
         f = np.dot(self.K,state.transpose())
         
         

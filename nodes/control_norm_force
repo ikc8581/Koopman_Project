@@ -43,7 +43,7 @@ class Control():
     
     def timer_callback(self,event):
         """
-        Callback for geometry_msgs/Twist publishing
+        Callback for geometry_msgs/Wrench publishing
         Args:
             None
         """ 

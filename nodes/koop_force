@@ -3,7 +3,7 @@
 
 import rospy
 
-from geometry_msgs.msg import Twist, Vector3, Quaternion
+from geometry_msgs.msg import Twist, Vector3, Quaternion, Wrench
 from gazebo_msgs.msg import LinkStates
 from tf_conversions import transformations
 
@@ -33,10 +33,8 @@ class ControlK():
         self.m_cart = rospy.get_param('m_cart')
         self.m_rod = rospy.get_param('m_rod')
         self.m_ball = rospy.get_param('m_ball')
-        self.m_wheel = rospy.get_param('m_wheel')
         self.l_rod = rospy.get_param('l_rod')
         self.r_ball = rospy.get_param('r_ball')
-        self.r_wheel = rospy.get_param('r_wheel')
         self.dt = rospy.get_param('dt')
         
         self.cart_pos = 0
@@ -45,9 +43,8 @@ class ControlK():
         self.link_angle_quat = [0, 0, 0, 1]
         self.link_angle_rpy = [0, 0, 0]
         self.timer = rospy.Timer(rospy.Duration(self.dt),self.timer_callback)
-        self.cmd_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10000)
+        self.cmd_pub = rospy.Publisher('/force', Wrench, queue_size=10000)
         self.link_sub = rospy.Subscriber('gazebo/link_states', LinkStates, self.link_state_callback)
-        self.controller = control.Quad_control((self.m_cart+2*self.m_wheel),self.m_ball,10.0,self.l_rod+self.r_ball)
         self.koopman = Koop_LQR(self.dt, 4, 1,self.cart_pos, self.link_angle_rpy[1], 0, 0, 0,1000 )
         
         test_koop()
@@ -55,7 +52,7 @@ class ControlK():
        
     def timer_callback(self,event):
         """
-        Callback for geometry_msgs/Twist publishing
+        Callback for geometry_msgs/Wrench publishing
         Args:
             None
         """
@@ -68,7 +65,7 @@ class ControlK():
             if not self.initial_pub:
                 u = self.koopman.compute_cmd(self.cart_pos,self.cart_vel,self.link_angle_rpy[1], self.rod_vel,self.last_cmd, self.K)
                 self.last_cmd = u
-                self.cmd_pub.publish(  Twist(Vector3(u,0,0),Vector3(0,0,0))  )
+                self.cmd_pub.publish(  Wrench(Vector3(u,0,0),Vector3(0,0,0))  )
         
         print('self.iter before lqr computation clause: ', self.iter)      
         if self.iter == 0:
@@ -90,15 +87,18 @@ class ControlK():
                 pose[]: pose of links
                 twist[]: twist of links
         """
-        self.link_angle_quat = [data.pose[5].orientation.x, data.pose[5].orientation.y, data.pose[5].orientation.z, data.pose[5].orientation.w]
-        self.link_angle_rpy = transformations.euler_from_quaternion(self.link_angle_quat) #source 03/31: https://github.com/ros/geometry/issues/109        
-        # rospy.loginfo(self.link_angle_rpy)
-        # self.controller.return_K()
-        # print('m_cart: ', self.m_cart)
         
+        self.link_angle_quat = [data.pose[2].orientation.x, data.pose[2].orientation.y, data.pose[2].orientation.z, data.pose[2].orientation.w]
+        self.link_angle_rpy = transformations.euler_from_quaternion(self.link_angle_quat) #source 03/31: https://github.com/ros/geometry/issues/109        
         self.cart_pos = data.pose[2].position.x
+
         self.cart_vel = data.twist[2].linear.x
         self.rod_vel = data.twist[2].angular.y
+        
+        print('angle rpy: ', self.link_angle_rpy)
+        print('cart pos: ', self.cart_pos)
+        print('rod vel: ', self.rod_vel)
+        print('cart vel: ', self.cart_vel)
         
     def excite_system(self):
         """
@@ -107,12 +107,12 @@ class ControlK():
 
         if self.iter % 1000 < 500:
             print('positive initial excitation ')
-            self.cmd_pub.publish(  Twist(Vector3(1,0,0),Vector3(0,0,0))  )
-            self.last_cmd = 1
+            self.cmd_pub.publish(  Wrench(Vector3(0.01,0,0),Vector3(0,0,0))  )
+            self.last_cmd = 0.01
         else:
             print('negative initial excitation ')
-            self.cmd_pub.publish(  Twist(Vector3(-1,0,0),Vector3(0,0,0))  )
-            self.last_cmd = -1
+            self.cmd_pub.publish(  Wrench(Vector3(-0.01,0,0),Vector3(0,0,0))  )
+            self.last_cmd = -0.01
 
 def main():
     """

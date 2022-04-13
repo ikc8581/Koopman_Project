@@ -13,7 +13,7 @@
     </group>
 
     <group if="$(eval mode=='koop')">
-        <node pkg="cartpole" type="koop" name="koop" output="screen">
+        <node pkg="cartpole" type="koop_force" name="koop_force" output="screen">
             
         </node>
     </group>

@@ -159,6 +159,7 @@ catkin_install_python(PROGRAMS
     nodes/control_norm
     nodes/control_norm_force
     nodes/koop
+    nodes/koop_force
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 #   scripts/my_python_script

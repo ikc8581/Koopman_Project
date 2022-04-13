@@ -35,6 +35,7 @@ class Koop_LQR():
         
         self.iterations = iterations
         self.iteration_curr = 0
+        self.cycle_count = 1
         
         self.state_obs = x_state+3
         self.u_obs = u_state
@@ -43,8 +44,13 @@ class Koop_LQR():
         self.A = np.zeros([self.total_obs,self.total_obs])
         self.G = np.zeros([self.total_obs,self.total_obs])
         self.K = np.zeros([self.total_obs,self.total_obs])
+        self.Kcont = np.zeros([self.total_obs,self.total_obs])
+
         
-        self.Q = np.eye(self.state_obs)
+        self.Q = 0.001*np.eye(self.state_obs)
+        self.Q[0,0] = 1
+
+        self.Q[2,2] = 1
         self.Q[4,4] = 0
         self.Q[5,5] = 0
         self.Q[6,6] = 0
@@ -52,7 +58,7 @@ class Koop_LQR():
         # self.R = np.eye(self.u_obs)
         # self.R[1,1] = 0
         
-        self.R = np.eye(u_state)
+        self.R = 0.001*np.eye(u_state)
         
         self.K_control = np.zeros( [self.u_obs,self.state_obs] )
         
@@ -90,9 +96,11 @@ class Koop_LQR():
         """
     
         self.iteration_curr += 1
+        print('inside train model: ', self.iteration_curr)
         
         if self.iteration_curr<self.iterations:
-            
+            print('u current:', u)
+            print('u current shape', type(u))
             self.x_old = self.x_curr
             self.xdot_old = self.xdot_curr
             self.theta_old = self.theta_old 
@@ -104,26 +112,41 @@ class Koop_LQR():
             self.theta_curr = theta
             self.thetadot_curr = thetadot
             self.u_curr = u
+            
+            print('x: ', self.x_curr)
+            print('xdot: ', self.xdot_curr)
+            print('theta: ', self.theta_curr)
+            print('thetadot: ', self.thetadot_curr)
             # self.udot_curr = udot
             
             psix_old = self.zee_x(self.x_old, self.xdot_old, self.theta_old, self.thetadot_old) #This is an array
             psix_curr = self.zee_x(self.x_curr, self.xdot_curr, self.theta_curr, self.thetadot_curr)
             
             
-            psiu_old = self.zee_u(self.theta_old, self.u_old)
-            psiu_curr = self.zee_u(self.theta_curr, self.u_curr)
+            psiu_old = self.zee_u(self.u_old)
+            psiu_curr = self.zee_u(self.u_curr)
             
-            print('psixold type: ', type(psix_old))
-            print('psiuold:', type(psiu_old))
+            # print('psixold type: ', type(psix_old))
+            # print('psiuold:', type(psiu_old))
+            
+            # print('shape psix curr', np.shape(psix_curr))
+            # print('shape psiu curr', np.shape(psiu_curr))
+            
             
             koop_old = np.concatenate((psix_old, psiu_old))
             koop_curr = np.concatenate((psix_curr, psiu_curr))
+
+            # print('koop old: ', koop_old)
+            # print('koop curr: ', koop_curr)
+
             
-            self.A += np.outer(koop_old,koop_old) / self.iteration_curr
-            self.G += np.outer(koop_old,koop_curr) / self.iteration_curr
+            self.A += np.outer(koop_curr,koop_old) 
+            self.G += np.outer(koop_old,koop_old)
             
-        if self.iteration_curr == self.iterations:
-            self.calculateK()                        
+        if self.iteration_curr == self.iterations-1:
+            print('resetting iterator inside, calculating K')
+            self.calculateK()
+            self.iteration_curr = 0                        
         
         return self.iteration_curr
     
@@ -141,7 +164,7 @@ class Koop_LQR():
         
         return np.array([x,xdot,theta,thetadot,1,np.sin(theta),np.cos(theta)])
     
-    def zee_u(self,theta,u):
+    def zee_u(self,u):
         """compute control input observation parameters
 
         Args:
@@ -159,10 +182,12 @@ class Koop_LQR():
         """
         print('A: ', self.A)
         print('G: ', self.G)
-        self.K =  np.dot(self.A,np.linalg.pinv(self.G))
+        print('current divider: ', (self.cycle_count*(self.iteration_curr+1)))
+        self.K =  np.dot(self.A/(self.cycle_count*(self.iteration_curr+1)),np.linalg.pinv(self.G/(self.cycle_count*(self.iteration_curr+1))))
         print('K: ', self.K)
-        self.K = np.real(sp.linalg.logm(self.K))/self.dt
+        self.Kcont = np.real(sp.linalg.logm(self.K))/self.dt
         print('K continuous: ', self.K)
+        self.cycle_count+=1
         
     
     
@@ -174,7 +199,7 @@ class Koop_LQR():
             the control B matrix
         """
         
-        return self.K[:self.state_obs,:self.state_obs], self.K[:self.state_obs,(self.state_obs):]
+        return self.Kcont[:self.state_obs,:self.state_obs], self.Kcont[:self.state_obs,self.state_obs:]
         
     
     def computeLQR(self):
@@ -206,21 +231,70 @@ class Koop_LQR():
             v (float): linear cmd magnitude to exert
         """
         
-        state = np.concatenate( (self.zee_x(x,xdot,theta,thetadot), self.zee_u( u ) )
-        desired = np.concatenate( (self.zee_x(0,0,0,0), self.zee_u(0, 0))  )
+        state =  self.zee_x(x,xdot,theta,thetadot)
+        desired =  self.zee_x(0,0,0,0)
         
         control_state = state-desired
+        print('K[0]: ', K[0])
+        print('control state: ', control_state)
         
-        cmd = np.dot(K, control_state.T)
+        cmd = -np.dot(K[0], control_state.T)
         
+        print('cmd: ', cmd)
         
-        return cmd
+        return cmd[0]
         
         
         
         #one of the Koopman u components is not a physical component, but a basis function. How do I resolve that?
         #the lqr algorihm should be solved for the for u, not koopman space v , and for z we should exclude all non observables see paper page 3
         
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
         
     def update_vel_states(self,xdot,thetadot,u):
         """update velocity states

@@ -48,9 +48,9 @@ class Koop_LQR():
 
         
         self.Q = 0.001*np.eye(self.state_obs)
-        self.Q[0,0] = 1
+        self.Q[0,0] = 10
 
-        self.Q[2,2] = 1
+        self.Q[2,2] = 10
         self.Q[4,4] = 0
         self.Q[5,5] = 0
         self.Q[6,6] = 0
@@ -99,8 +99,8 @@ class Koop_LQR():
         print('inside train model: ', self.iteration_curr)
         
         if self.iteration_curr<self.iterations:
-            print('u current:', u)
-            print('u current shape', type(u))
+            # print('u current:', u)
+            # print('u current shape', type(u))
             self.x_old = self.x_curr
             self.xdot_old = self.xdot_curr
             self.theta_old = self.theta_old 
@@ -113,11 +113,11 @@ class Koop_LQR():
             self.thetadot_curr = thetadot
             self.u_curr = u
             
-            print('x: ', self.x_curr)
-            print('xdot: ', self.xdot_curr)
-            print('theta: ', self.theta_curr)
-            print('thetadot: ', self.thetadot_curr)
-            # self.udot_curr = udot
+            # print('x: ', self.x_curr)
+            # print('xdot: ', self.xdot_curr)
+            # print('theta: ', self.theta_curr)
+            # print('thetadot: ', self.thetadot_curr)
+            # # self.udot_curr = udot
             
             psix_old = self.zee_x(self.x_old, self.xdot_old, self.theta_old, self.thetadot_old) #This is an array
             psix_curr = self.zee_x(self.x_curr, self.xdot_curr, self.theta_curr, self.thetadot_curr)
@@ -180,13 +180,13 @@ class Koop_LQR():
         K matrix calculation (continuous)
         
         """
-        print('A: ', self.A)
-        print('G: ', self.G)
-        print('current divider: ', (self.cycle_count*(self.iteration_curr+1)))
+        # print('A: ', self.A)
+        # print('G: ', self.G)
+        # print('current divider: ', (self.cycle_count*(self.iteration_curr+1)))
         self.K =  np.dot(self.A/(self.cycle_count*(self.iteration_curr+1)),np.linalg.pinv(self.G/(self.cycle_count*(self.iteration_curr+1))))
-        print('K: ', self.K)
+        # print('K: ', self.K)
         self.Kcont = np.real(sp.linalg.logm(self.K))/self.dt
-        print('K continuous: ', self.K)
+        # print('K continuous: ', self.K)
         self.cycle_count+=1
         
     
@@ -210,12 +210,12 @@ class Koop_LQR():
         """
         A_state, B_state = self.returnKoopState()
         print('A_state: ', A_state)
-        print('A state shape ', np.shape(A_state))
+        # print('A state shape ', np.shape(A_state))
         print('B_state: ', B_state)
-        print('B state shape ', np.shape(B_state))
+        # print('B state shape ', np.shape(B_state))
         gains = lqr(A_state,B_state,self.Q,self.R)
-        print('LQR matrix: ', gains)
-        print('gain matrix dimensions: ', np.shape(gains))
+        # print('LQR matrix: ', gains)
+        # print('gain matrix dimensions: ', np.shape(gains))
         return gains
     
     def compute_cmd(self,x,xdot,theta,thetadot, u, K):
@@ -235,12 +235,12 @@ class Koop_LQR():
         desired =  self.zee_x(0,0,0,0)
         
         control_state = state-desired
-        print('K[0]: ', K[0])
-        print('control state: ', control_state)
+        # print('K[0]: ', K[0])
+        # print('control state: ', control_state)
         
         cmd = -np.dot(K[0], control_state.T)
         
-        print('cmd: ', cmd)
+        # print('cmd: ', cmd)
         
         return cmd[0]
         

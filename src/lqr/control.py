@@ -161,6 +161,8 @@ class Quad_control_force():
         R = np.asmatrix([0.01])
         
         self.K,self.S,self.E = lqr(A,B,Q,R)
+        print('A_state: ', A)
+        print('B_state: ', B)
         
         
         
@@ -180,7 +182,7 @@ class Quad_control_force():
             Force (x direction)
         """
         
-        state = np.matrix( [-x + 2, -xdot,theta,thetadot] ) #positive x needs negative force, others just positive
+        state = np.matrix( [-x + 10, -xdot,theta,thetadot] ) #positive x needs negative force, others just positive
         f = np.dot(self.K,state.transpose())
         
         

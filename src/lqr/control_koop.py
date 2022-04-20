@@ -1,5 +1,5 @@
 import numpy as np
-import scipy as sp
+import scipy as spicy
 
 from control import lqr
 
@@ -51,9 +51,9 @@ class Koop_LQR():
         self.Q[0,0] = 10
 
         self.Q[2,2] = 10
-        self.Q[4,4] = 0
-        self.Q[5,5] = 0
-        self.Q[6,6] = 0
+        # self.Q[4,4] = 0
+        # self.Q[5,5] = 0
+        # self.Q[6,6] = 0
         
         # self.R = np.eye(self.u_obs)
         # self.R[1,1] = 0
@@ -103,7 +103,7 @@ class Koop_LQR():
             # print('u current shape', type(u))
             self.x_old = self.x_curr
             self.xdot_old = self.xdot_curr
-            self.theta_old = self.theta_old 
+            self.theta_old = self.theta_curr
             self.thetadot_old = self.thetadot_curr
             self.u_old = self.u_curr
             
@@ -115,7 +115,7 @@ class Koop_LQR():
             
             # print('x: ', self.x_curr)
             # print('xdot: ', self.xdot_curr)
-            # print('theta: ', self.theta_curr)
+            print('theta: ', self.theta_curr)
             # print('thetadot: ', self.thetadot_curr)
             # # self.udot_curr = udot
             
@@ -127,21 +127,28 @@ class Koop_LQR():
             psiu_curr = self.zee_u(self.u_curr)
             
             # print('psixold type: ', type(psix_old))
-            # print('psiuold:', type(psiu_old))
-            
+            print('psiuold:', psiu_old)
+            print('psixold:', psix_old)
+            print('psiucurr:', psiu_curr)
+            print('psixcurr:', psix_curr)
+
             # print('shape psix curr', np.shape(psix_curr))
             # print('shape psiu curr', np.shape(psiu_curr))
+            # print('shape psix old', np.shape(psix_old))
+            # print('shape psiu old', np.shape(psiu_old))
             
             
             koop_old = np.concatenate((psix_old, psiu_old))
             koop_curr = np.concatenate((psix_curr, psiu_curr))
 
-            # print('koop old: ', koop_old)
-            # print('koop curr: ', koop_curr)
+            print('koop old: ', koop_old)
+            print('koop curr: ', koop_curr)
 
             
             self.A += np.outer(koop_curr,koop_old) 
             self.G += np.outer(koop_old,koop_old)
+            # print('self.A: ', self.A)
+            # print('self.G: ', self.G)
             
         if self.iteration_curr == self.iterations-1:
             print('resetting iterator inside, calculating K')
@@ -168,7 +175,6 @@ class Koop_LQR():
         """compute control input observation parameters
 
         Args:
-            theta (float): rod angle
             u (float): cmd_vel command , np.cos(theta)
         """
         
@@ -185,8 +191,10 @@ class Koop_LQR():
         # print('current divider: ', (self.cycle_count*(self.iteration_curr+1)))
         self.K =  np.dot(self.A/(self.cycle_count*(self.iteration_curr+1)),np.linalg.pinv(self.G/(self.cycle_count*(self.iteration_curr+1))))
         # print('K: ', self.K)
-        self.Kcont = np.real(sp.linalg.logm(self.K))/self.dt
-        # print('K continuous: ', self.K)
+        self.Kcont = np.real(spicy.linalg.logm(self.K))/self.dt
+        K_reduced = self.Kcont[:4,:]
+        print('K reduced cont: ',  K_reduced)
+        # print('K continuous: ', self.Kcont)
         self.cycle_count+=1
         
     
@@ -199,7 +207,7 @@ class Koop_LQR():
             the control B matrix
         """
         
-        return self.Kcont[:self.state_obs,:self.state_obs], self.Kcont[:self.state_obs,self.state_obs:]
+        return self.Kcont[:self.state_obs,:self.state_obs], self.Kcont[:self.state_obs,-1]
         
     
     def computeLQR(self):
@@ -208,11 +216,13 @@ class Koop_LQR():
         Returns:
             Gain matrix (7x2 for cart pole system)
         """
-        A_state, B_state = self.returnKoopState()
+
+        A_state, B = self.returnKoopState()
+        B_state = np.reshape(B, (-1,1))
         print('A_state: ', A_state)
-        # print('A state shape ', np.shape(A_state))
+        print('A state shape ', np.shape(A_state))
         print('B_state: ', B_state)
-        # print('B state shape ', np.shape(B_state))
+        print('B state shape ', np.shape(B_state))
         gains = lqr(A_state,B_state,self.Q,self.R)
         # print('LQR matrix: ', gains)
         # print('gain matrix dimensions: ', np.shape(gains))
@@ -234,7 +244,7 @@ class Koop_LQR():
         state =  self.zee_x(x,xdot,theta,thetadot)
         desired =  self.zee_x(0,0,0,0)
         
-        control_state = state-desired
+        control_state = state[:self.state_obs]-desired[:self.state_obs]
         # print('K[0]: ', K[0])
         # print('control state: ', control_state)
         

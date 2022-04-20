@@ -124,7 +124,7 @@ class Quad_control():
             
 class Quad_control_force():
  
-    def __init__(self,m_cart=0, m_pole=0  , g=0, l=0):
+    def __init__(self,m_cart=0, m_pole=0  , g=0, l=0, m_ball = 0):
         """
         LQR controller
         Args: 
@@ -135,9 +135,10 @@ class Quad_control_force():
         """   
         self.m_cart = m_cart
         self.m_pole = m_pole
+        self.m_ball = m_ball
         
         A = np.matrix([
-            [0,1,0,0],[0,0,g*m_pole/m_cart,0],[0,0,0,1],[0,0,(m_pole*g+m_cart*g)/(m_cart*l),0]    
+            [0,1,0,0],[0,0,g*(m_pole+m_ball)/m_cart,0],[0,0,0,1],[0,0,(m_ball*g + m_pole*g+m_cart*g)/(m_cart*l),0]    
         ])
         
         B = np.matrix(

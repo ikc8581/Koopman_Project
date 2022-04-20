@@ -36,7 +36,7 @@ class Control():
         self.timer = rospy.Timer(rospy.Duration(self.dt),self.timer_callback)
         self.cmd_pub = rospy.Publisher('/force', Wrench, queue_size=10000)
         self.link_sub = rospy.Subscriber('gazebo/link_states', LinkStates, self.link_state_callback)
-        self.controller = control.Quad_control_force((self.m_cart),self.m_ball,10.0,self.l_rod+self.r_ball)
+        self.controller = control.Quad_control_force((self.m_cart),self.m_ball,10.0,self.l_rod+self.r_ball, self.m_ball)
         
         
         

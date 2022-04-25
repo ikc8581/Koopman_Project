@@ -33,7 +33,7 @@ class ControlK():
         
         self.iter = 0
         self.initial_pub = True
-        self.training_cycles = rospy.get_param('freq')/200 - 2
+        self.training_cycles = rospy.get_param('freq')/20 - 2
         self.m_cart = rospy.get_param('m_cart')
         self.m_rod = rospy.get_param('m_rod')
         self.m_ball = rospy.get_param('m_ball')

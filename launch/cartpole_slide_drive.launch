@@ -17,6 +17,14 @@
             
         </node>
     </group>
+
+    <group if="$(eval mode=='tele')">
+        <node pkg="cartpole" type="koopman_train" name="koop_train" output="screen">
+        </node>
+        <!-- <node pkg="cartpole" type="teleop_force" name="teleop_force">
+        </node> -->
+
+    </group>    
    
     <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/> 
 

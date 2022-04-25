@@ -9,10 +9,10 @@ l_wheel: 0.5
 
 m_rod: 0.0001
 r_rod: 0.01
-l_rod: 1.0
+l_rod: 0.5
 
-m_ball: 0.5
+m_ball: 0.25
 r_ball: 0.25
 
-dt: 0.001
-freq: 1000
+dt: 0.01
+freq: 100

@@ -1,5 +1,5 @@
 import numpy as np
-import scipy as spicy
+import scipy.linalg as spicy_linalg
 
 from control import lqr
 
@@ -77,6 +77,7 @@ class Koop_LQR():
         self.thetadot_old = thetadot_curr
         self.u_old = u_curr
         # self.udot_old = udot_curr
+        self.divider = 1
         
     def dummy_method(self):
         print('dummy method')
@@ -145,8 +146,9 @@ class Koop_LQR():
             print('koop curr: ', koop_curr)
 
             
-            self.A += np.outer(koop_curr,koop_old) 
-            self.G += np.outer(koop_old,koop_old)
+            self.A += np.outer(koop_curr,koop_old) / self.divider 
+            self.G += np.outer(koop_old,koop_old) / self.divider
+            self.divider+=1
             # print('self.A: ', self.A)
             # print('self.G: ', self.G)
             
@@ -189,10 +191,14 @@ class Koop_LQR():
         # print('A: ', self.A)
         # print('G: ', self.G)
         # print('current divider: ', (self.cycle_count*(self.iteration_curr+1)))
-        self.K =  np.dot(self.A/(self.cycle_count*(self.iteration_curr+1)),np.linalg.pinv(self.G/(self.cycle_count*(self.iteration_curr+1))))
+        
+        self.K =  np.dot(self.A,np.linalg.pinv(self.G))
+        # self.K =  np.dot(self.A/(self.cycle_count*(self.iteration_curr+1)),np.linalg.pinv(self.G/(self.cycle_count*(self.iteration_curr+1))))
+        
+        
         # print('K: ', self.K)
-        self.Kcont = np.real(spicy.linalg.logm(self.K))/self.dt
-        K_reduced = self.Kcont[:4,:]
+        self.Kcont = np.real(spicy_linalg.logm(self.K))/self.dt
+        K_reduced = self.K[:4,:]
         print('K reduced cont: ',  K_reduced)
         # print('K continuous: ', self.Kcont)
         self.cycle_count+=1

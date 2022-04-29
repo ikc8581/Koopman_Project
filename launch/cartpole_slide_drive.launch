@@ -46,6 +46,6 @@
     <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cartpole)/cartpole_view.rviz" required="true"/> -->
 
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
-    args="-urdf -param robot_description -model cartpoleslide -z 0.1" />
+    args="-urdf -param robot_description -model cartpoleslide -z 0.0" />
 
 </launch>

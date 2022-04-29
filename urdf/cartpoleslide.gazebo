@@ -24,14 +24,14 @@
         <mu2>0</mu2>
        </gazebo>
 
-       <gazebo>
-           <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
-            <alwaysOn>true</alwaysOn>
-            <update>1000</update>
-            <updateRate>1000.0</updateRate>
-            <bodyName>platform</bodyName>
-            <topicName>force</topicName>
-           </plugin>
-      </gazebo> 
+    <gazebo>
+        <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
+        <alwaysOn>true</alwaysOn>
+        <update>1000</update>
+        <updateRate>1000.0</updateRate>
+        <bodyName>platform</bodyName>
+        <topicName>force</topicName>
+        </plugin>
+    </gazebo> 
 
 </robot>

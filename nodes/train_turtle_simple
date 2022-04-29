@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+
+
+import rospy
+
+from nuturtlebot_msgs.msg import SensorData
+from nuturtlebot_msgs.msg import WheelCommands
+
+from geometry_msgs.msg import Twist
+
+from lqr.koop_train import Turtle_Koop
+
+from cartpole.msg import Data
+
+
+class Simple_Turtle():
+    def __init__(self):
+        
+        self.dt = rospy.get_param('dt')
+        self.encoder_ticks_to_rad = 0.001534
+        
+        self.ltheta = 0.
+        self.rtheta = 0.
+        
+        self.lcmd = 0.
+        self.rcmd = 0.
+
+        self.encoder_sub =  rospy.Subscriber('/sensor_data', SensorData, self.encoder_callback)
+        self.cmd_sub = rospy.Subscriber('/wheel_cmd', WheelCommands, self.cmd_callback)
+        self.twist_pub = rospy.Publisher('/cmd_vel', Twist, queue_size = 10)
+        self.data_l_pub = rospy.Publisher('/l_data', Data, queue_size=10000)
+        self.data_r_pub = rospy.Publisher('/r_data', Data, queue_size=10000)
+        
+        self.first = True
+        
+        self.koopman = Turtle_Koop(self.dt, 2, 2, self.ltheta, self.rtheta, self.lcmd, self.rcmd)
+        
+        self.l_first = 0.
+        self.r_first = 0.
+        
+        self.iteration = 0
+        
+        
+        
+    def encoder_callback(self,data):
+        """encoder turtlebot data
+
+        Args:
+            data (nuturtlebot_msg): encoder data from turtlebot
+        """
+        
+        t = Twist()
+        t.linear.x = 0.05
+        t.linear.y = 0.
+        t.linear.z = 0.
+        
+        t.angular.x = 0.
+        t.angular.y = 0.
+        t.angular.z = 0.
+        
+        self.twist_pub.publish(t)
+        
+        self.ltheta = data.left_encoder
+        self.rtheta = data.right_encoder
+        
+
+        
+        if self.first == True:
+            self.l_first = self.ltheta
+            self.r_first = self.rtheta
+            self.first = False
+        
+        # print("right angle: ", self.rtheta - self.r_first)
+        # print("left angle: ", self.ltheta - self.l_first)
+        
+        self.data_l_pub.publish(self.ltheta - self.l_first)
+        self.data_r_pub.publish(self.rtheta - self.r_first)
+        
+        self.iteration+=1
+        print('iteration: ', self.iteration)
+        self.koopman.train_model(self.ltheta - self.l_first, self.rtheta - self.r_first, self.lcmd, self.rcmd)
+        self.koopman.calculateK()
+        
+
+        
+    def cmd_callback(self, data):
+        """motor command callback
+
+        Args:
+            data (WheelCommands): input commands to system
+        """
+        
+        self.lcmd = float(data.left_velocity)
+        self.rcmd = float(data.right_velocity)
+        
+        # print('rcmd: ', self.rcmd)
+        # print('lcmd: ', self.lcmd)
+        
+        
+        
+def main():
+    """
+    Main function
+    """
+    rospy.init_node('simple_turtle')
+    simple = Simple_Turtle()
+    rospy.spin()
+
+if __name__ == '__main__':
+    main()

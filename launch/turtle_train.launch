@@ -1,0 +1,11 @@
+<launch>
+
+    <rosparam file="$(find cartpole)/config/turtle_params.yaml" command="load" />
+
+
+    <node pkg="cartpole" type="train_turtle_simple" name="train_turtle_simple" output="screen">
+    </node>
+
+
+
+</launch>

@@ -134,7 +134,7 @@ class Koop():
 
         
 class Turtle_Koop():
-    def __init__(self,dt=0.0,x_state=2,u_state=2, l_curr = 0.0, r_curr = 0.0, ul_curr = 0.0, ur_curr = 0.0):
+    def __init__(self,dt=0.0,x_state=2,u_state=2, l_curr = 0.0, r_curr = 0.0, lv_curr = 0.0, rv_curr = 0.0, ul_curr = 0.0, ur_curr = 0.0):
         """Turtlebot Koopman training class
 
         Args:
@@ -143,6 +143,8 @@ class Turtle_Koop():
             u_state: number of input observtations
             l_curr (float): current left wheel position
             r_curr (float): current right wheel position
+            lv_curr(float): current levt wheel velocity
+            rv_curr(float): current right wheel velocity
             ur_curr (float): current right wheel command input
             ul_curr (float): current left wheel command input
         """
@@ -162,6 +164,11 @@ class Turtle_Koop():
         self.l_old = l_curr
         self.r_old = r_curr
         
+        self.lv_curr = lv_curr
+        self.rv_curr = rv_curr
+        self.lv_old = lv_curr
+        self.rv_old = rv_curr
+        
         self.ul_curr = ul_curr
         self.ur_curr = ur_curr
         self.ul_old = ul_curr
@@ -170,14 +177,16 @@ class Turtle_Koop():
         self.divider = 1
 
 
-    def train_model(self,ltheta,rtheta,ul, ur):
+    def train_model(self,ltheta,rtheta, lvel, rvel, ul, ur):
         
         """train model parameters using Koopman
 
         Args:
             ltheta: updated left wheel angle
             rtheta: updated right wheel angle
-              ul: updated left wheel command
+            lvel: left wheel velocity
+            rvel: right wheel velocity
+            ul: updated left wheel command
             ur: updated right wheel command
             
         Returns:
@@ -188,14 +197,18 @@ class Turtle_Koop():
         self.r_old = self.r_curr
         self.ul_old = self.ul_curr
         self.ur_old = self.ur_curr
+        self.lv_old = self.lv_curr
+        self.rv_old = self.rv_curr
         
         self.l_curr = ltheta
         self.r_curr = rtheta
+        self.lv_curr = lvel
+        self.rv_curr = rvel
         self.ul_curr = ul
         self.ur_curr = ur
         
-        psix_old = self.zee_x(self.l_old, self.r_old) #This is an array
-        psix_curr = self.zee_x(self.l_curr, self.r_curr)
+        psix_old = self.zee_x(self.l_old, self.r_old,self.lv_old,self.rv_old) #This is an array
+        psix_curr = self.zee_x(self.l_curr, self.r_curr, self.lv_curr, self.rv_curr)
         
         psiu_old = self.zee_u(self.ul_old, self.ur_old)
         psiu_curr = self.zee_u(self.ul_curr, self.ur_curr)
@@ -203,8 +216,8 @@ class Turtle_Koop():
         koop_old = np.concatenate((psix_old, psiu_old))
         koop_curr = np.concatenate((psix_curr, psiu_curr))
         
-        print(koop_curr.shape)
-        print(koop_old.shape)
+        # print(koop_curr.shape)
+        # print(koop_old.shape)
         
         self.A += np.outer(koop_curr,koop_old) / self.divider 
         self.G += np.outer(koop_old,koop_old) / self.divider               
@@ -212,7 +225,7 @@ class Turtle_Koop():
         self.divider+=1
 
 
-    def zee_x(self,ltheta, rtheta):
+    def zee_x(self,ltheta, rtheta, lvel, rvel):
         """Compute state observation parameters
 
         Args:
@@ -222,7 +235,7 @@ class Turtle_Koop():
             ur: right wheel command
         """
         
-        return np.array([ltheta, rtheta, 1., np.sin(ltheta),np.cos(ltheta),1., np.sin(rtheta),np.cos(rtheta)])
+        return np.array([ltheta, rtheta, lvel, rvel, 1., np.sin(ltheta),np.cos(ltheta),1., np.sin(rtheta),np.cos(rtheta)])
     
     
     def zee_u(self,ul, ur):
@@ -245,5 +258,5 @@ class Turtle_Koop():
   
         self.K =  np.dot(self.A,np.linalg.pinv(self.G))
 
-        K_reduced = self.K[:2,:]
+        K_reduced = self.K[:4,:]
         print('K reduced : ',  repr(K_reduced))

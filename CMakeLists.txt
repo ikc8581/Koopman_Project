@@ -162,6 +162,7 @@ catkin_install_python(PROGRAMS
     nodes/teleop_force
     nodes/koopman_train
     nodes/train_turtle_simple
+    nodes/train_turtle_simple_ticks_cmd
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 #   scripts/my_python_script

@@ -161,6 +161,7 @@ catkin_install_python(PROGRAMS
     nodes/koop_force
     nodes/teleop_force
     nodes/koopman_train
+    nodes/rsense_data
     nodes/train_turtle_simple
     nodes/train_turtle_simple_ticks_cmd
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

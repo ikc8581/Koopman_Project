@@ -11,7 +11,7 @@ from sensor_msgs.msg import JointState
 
 from geometry_msgs.msg import Twist
 
-from lqr.koop_train import Turtle_Koop, Turtle_Koop_Vel, Turtle_Koop_Poly
+from lqr.koop_train import Turtle_Koop, Turtle_Koop_Vel, Turtle_Koop_Poly, Turtle_Koop_Poly3, Turtle_Koop_Poly4
 
 from cartpole.msg import Data
 
@@ -28,11 +28,11 @@ class Simple_Turtle():
         self.ltheta = 0.
         self.rtheta = 0.
         
-        self.lvel = 3.03
-        self.rvel = 3.03     
+        self.lvel = 6.05  #3.0303
+        self.rvel = 6.05  #3.03     
         
-        self.lcmd = 3.03
-        self.rcmd = 3.03
+        self.lcmd = 6.05  #3.0303
+        self.rcmd = 6.05  #3.0303
 
         self.encoder_sub =  rospy.Subscriber('/sensor_data', SensorData, self.encoder_callback)
         self.cmd_sub = rospy.Subscriber('/wheel_cmd', WheelCommands, self.cmd_callback)
@@ -50,7 +50,7 @@ class Simple_Turtle():
         if self.basis == 'fourier':
             self.koopman = Turtle_Koop_Vel(self.dt, 4, 2, self.ltheta, self.rtheta, self.lvel, self.rvel, self.lcmd, self.rcmd)
         if self.basis == 'poly':
-            self.koopman = Turtle_Koop_Poly(self.dt, 4, 2, self.ltheta, self.rtheta, self.lvel, self.rvel, self.lcmd, self.rcmd)
+            self.koopman = Turtle_Koop_Poly4(self.dt, 4, 2, self.ltheta, self.rtheta, self.lvel, self.rvel, self.lcmd, self.rcmd)
   
         
         self.l_first = 0.
@@ -68,9 +68,9 @@ class Simple_Turtle():
         self.rvel = data.velocity[1]
         
         if self.lvel<1.:
-            self.lvel = 3.03
+            self.lvel = 6.05 #3.0303
         if self.rvel<1.:
-            self.rvel = 3.03
+            self.rvel = 6.05  #3.0303
         
         self.data_lv_pub.publish(self.lvel)
         self.data_rv_pub.publish(self.rvel)  
@@ -98,7 +98,7 @@ class Simple_Turtle():
         """
         
         t = Twist()
-        t.linear.x = 0.1
+        t.linear.x = 0.22
         t.linear.y = 0.
         t.linear.z = 0.
         

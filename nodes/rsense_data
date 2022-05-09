@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+
+import rospy
+
+import tf2_ros
+from cartpole.msg import Data
+
+
+
+
+class Cam():
+    def __init__(self):
+        
+        self.buf = tf2_ros.Buffer()
+        self.listen = tf2_ros.TransformListener(self.buf)
+        self.timer = rospy.Timer(rospy.Duration(1./12),self.timer_callback)
+  
+        self.data_pub = rospy.Publisher('/x_data', Data, queue_size=10000)
+        
+        self.time_data = rospy.Timer(rospy.Duration(1./305), self.timer_data_callback)
+
+        self.x = 0.
+        self.x_first = 0.
+        
+        self.first = True
+        
+        
+        
+
+    def timer_callback(self,event):
+        """
+        Callback for getting camera data
+        Args:
+            None
+        """ 
+        try:
+            query = self.buf.lookup_transform("camera_color_optical_frame", "tag_10", rospy.Time())
+            
+            if self.first:
+                self.x_first = query.transform.translation.x
+                self.first = False
+                
+            self.x = query.transform.translation.x - self.x_first
+        except:
+            print('april tag transform not available')
+        print(self.x)
+
+    def timer_data_callback(self, event):
+        """X data publisher 
+
+        Args:
+            None
+        """
+        self.data_pub.publish(self.x)
+        
+               
+        
+        
+
+                
+def main():
+    """
+    Main function
+    """
+    rospy.init_node('rsense')
+    cam = Cam()
+    rospy.spin()
+
+if __name__ == '__main__':
+    main()

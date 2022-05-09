@@ -521,3 +521,263 @@ class Turtle_Koop_Poly():
 
         K_reduced = self.K[:4,:]
         print('K reduced : ',  repr(K_reduced))
+
+class Turtle_Koop_Poly3():
+    def __init__(self,dt=0.0,x_state=2,u_state=2, l_curr = 0.0, r_curr = 0.0, lv_curr = 0.0, rv_curr = 0.0, ul_curr = 0.0, ur_curr = 0.0):
+        """Turtlebot Koopman training class using polynomial basis functions
+
+        Args:
+            dt (float): sampling time Defaults to 0.
+            x_state (float): number of state observations
+            u_state: number of input observtations
+            l_curr (float): current left wheel position
+            r_curr (float): current right wheel position
+            lv_curr(float): current levt wheel velocity
+            rv_curr(float): current right wheel velocity
+            ur_curr (float): current right wheel command input
+            ul_curr (float): current left wheel command input
+        """
+        
+        self.dt = dt
+        
+        self.state_obs = x_state+8
+        self.u_obs = u_state
+        self.total_obs = self.u_obs + self.state_obs
+        
+        self.A = np.zeros([self.total_obs,self.total_obs])
+        self.G = np.zeros([self.total_obs,self.total_obs])
+        self.K = np.zeros([self.total_obs,self.total_obs])
+        
+        self.l_curr = l_curr
+        self.r_curr = r_curr
+        self.l_old = l_curr
+        self.r_old = r_curr
+        
+        self.lv_curr = lv_curr
+        self.rv_curr = rv_curr
+        self.lv_old = lv_curr
+        self.rv_old = rv_curr
+        
+        self.ul_curr = ul_curr
+        self.ur_curr = ur_curr
+        self.ul_old = ul_curr
+        self.ur_old = ur_curr
+        
+        self.divider = 1
+
+
+    def train_model(self,ltheta,rtheta, lvel, rvel, ul, ur):
+        
+        """train model parameters using Koopman
+
+        Args:
+            ltheta: updated left wheel angle
+            rtheta: updated right wheel angle
+            lvel: left wheel velocity
+            rvel: right wheel velocity
+            ul: updated left wheel command
+            ur: updated right wheel command
+            
+        Returns:
+            None
+        """
+        
+        self.l_old = self.l_curr
+        self.r_old = self.r_curr
+        self.ul_old = self.ul_curr
+        self.ur_old = self.ur_curr
+        self.lv_old = self.lv_curr
+        self.rv_old = self.rv_curr
+        
+        self.l_curr = ltheta
+        self.r_curr = rtheta
+        self.lv_curr = lvel
+        self.rv_curr = rvel
+        self.ul_curr = ul
+        self.ur_curr = ur
+        
+        psix_old = self.zee_x(self.l_old, self.r_old,self.lv_old,self.rv_old) #This is an array
+        psix_curr = self.zee_x(self.l_curr, self.r_curr, self.lv_curr, self.rv_curr)
+        
+        psiu_old = self.zee_u(self.ul_old, self.ur_old)
+        psiu_curr = self.zee_u(self.ul_curr, self.ur_curr)
+
+        koop_old = np.concatenate((psix_old, psiu_old))
+        koop_curr = np.concatenate((psix_curr, psiu_curr))
+        
+        # print(koop_curr.shape)
+        # print(koop_old.shape)
+        print('polynomial...')
+        
+        self.A += np.outer(koop_curr,koop_old) / self.divider 
+        self.G += np.outer(koop_old,koop_old) / self.divider               
+             
+        self.divider+=1
+
+
+    def zee_x(self,ltheta, rtheta, lvel, rvel):
+        """Compute state observation parameters
+
+        Args:
+            ltheta: left wheel angle
+            rtheta: right wheel angle 
+            ul: left wheel command
+            ur: right wheel command
+        """
+        
+        return np.array([ltheta, rtheta, lvel, rvel, 1., lvel**2, rvel**2, lvel*rvel, lvel**3, lvel*rvel**2, rvel*lvel**2, rvel**3])
+    
+    
+    def zee_u(self,ul, ur):
+        """compute control input observation parameters
+
+        Args:
+            ul (float): left wheel command
+            ur (float): left wheel command
+        """
+        
+        return np.array([ul, ur])
+
+        
+
+    def calculateK(self):
+        """
+        K matrix calculation (continuous)
+        
+        """
+  
+        self.K =  np.dot(self.A,np.linalg.pinv(self.G))
+
+        K_reduced = self.K[:4,:]
+        print('K reduced : ',  repr(K_reduced))
+        
+        
+        
+class Turtle_Koop_Poly4():
+    def __init__(self,dt=0.0,x_state=2,u_state=2, l_curr = 0.0, r_curr = 0.0, lv_curr = 0.0, rv_curr = 0.0, ul_curr = 0.0, ur_curr = 0.0):
+        """Turtlebot Koopman training class using polynomial basis functions
+
+        Args:
+            dt (float): sampling time Defaults to 0.
+            x_state (float): number of state observations
+            u_state: number of input observtations
+            l_curr (float): current left wheel position
+            r_curr (float): current right wheel position
+            lv_curr(float): current levt wheel velocity
+            rv_curr(float): current right wheel velocity
+            ur_curr (float): current right wheel command input
+            ul_curr (float): current left wheel command input
+        """
+        
+        self.dt = dt
+        
+        self.state_obs = x_state+13
+        self.u_obs = u_state
+        self.total_obs = self.u_obs + self.state_obs
+        
+        self.A = np.zeros([self.total_obs,self.total_obs])
+        self.G = np.zeros([self.total_obs,self.total_obs])
+        self.K = np.zeros([self.total_obs,self.total_obs])
+        
+        self.l_curr = l_curr
+        self.r_curr = r_curr
+        self.l_old = l_curr
+        self.r_old = r_curr
+        
+        self.lv_curr = lv_curr
+        self.rv_curr = rv_curr
+        self.lv_old = lv_curr
+        self.rv_old = rv_curr
+        
+        self.ul_curr = ul_curr
+        self.ur_curr = ur_curr
+        self.ul_old = ul_curr
+        self.ur_old = ur_curr
+        
+        self.divider = 1
+
+
+    def train_model(self,ltheta,rtheta, lvel, rvel, ul, ur):
+        
+        """train model parameters using Koopman
+
+        Args:
+            ltheta: updated left wheel angle
+            rtheta: updated right wheel angle
+            lvel: left wheel velocity
+            rvel: right wheel velocity
+            ul: updated left wheel command
+            ur: updated right wheel command
+            
+        Returns:
+            None
+        """
+        
+        self.l_old = self.l_curr
+        self.r_old = self.r_curr
+        self.ul_old = self.ul_curr
+        self.ur_old = self.ur_curr
+        self.lv_old = self.lv_curr
+        self.rv_old = self.rv_curr
+        
+        self.l_curr = ltheta
+        self.r_curr = rtheta
+        self.lv_curr = lvel
+        self.rv_curr = rvel
+        self.ul_curr = ul
+        self.ur_curr = ur
+        
+        psix_old = self.zee_x(self.l_old, self.r_old,self.lv_old,self.rv_old) #This is an array
+        psix_curr = self.zee_x(self.l_curr, self.r_curr, self.lv_curr, self.rv_curr)
+        
+        psiu_old = self.zee_u(self.ul_old, self.ur_old)
+        psiu_curr = self.zee_u(self.ul_curr, self.ur_curr)
+
+        koop_old = np.concatenate((psix_old, psiu_old))
+        koop_curr = np.concatenate((psix_curr, psiu_curr))
+        
+        # print(koop_curr.shape)
+        # print(koop_old.shape)
+        print('polynomial...')
+        
+        self.A += np.outer(koop_curr,koop_old) / self.divider 
+        self.G += np.outer(koop_old,koop_old) / self.divider               
+             
+        self.divider+=1
+
+
+    def zee_x(self,ltheta, rtheta, lvel, rvel):
+        """Compute state observation parameters
+
+        Args:
+            ltheta: left wheel angle
+            rtheta: right wheel angle 
+            ul: left wheel command
+            ur: right wheel command
+        """
+        
+        return np.array([ltheta, rtheta, lvel, rvel, 1.,rvel**2, lvel*rvel, lvel**2, rvel**3, lvel*rvel**2, (lvel**2)*rvel, lvel**3,rvel**4, lvel*(rvel**3), (lvel**2)*(rvel**2), (lvel**3)*rvel, lvel**4])
+    
+    
+    def zee_u(self,ul, ur):
+        """compute control input observation parameters
+
+        Args:
+            ul (float): left wheel command
+            ur (float): left wheel command
+        """
+        
+        return np.array([ul, ur])
+
+        
+
+    def calculateK(self):
+        """
+        K matrix calculation (continuous)
+        
+        """
+  
+        self.K =  np.dot(self.A,np.linalg.pinv(self.G))
+
+        K_reduced = self.K[:4,:]
+        print('K reduced : ',  repr(K_reduced))

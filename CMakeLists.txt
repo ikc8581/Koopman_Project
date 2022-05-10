@@ -164,6 +164,7 @@ catkin_install_python(PROGRAMS
     nodes/rsense_data
     nodes/train_turtle_simple
     nodes/train_turtle_simple_ticks_cmd
+    nodes/train_turtle_ground_straight
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 #   scripts/my_python_script

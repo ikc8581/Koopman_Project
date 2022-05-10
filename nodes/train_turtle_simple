@@ -75,9 +75,6 @@ class Simple_Turtle():
         self.data_lv_pub.publish(self.lvel)
         self.data_rv_pub.publish(self.rvel)  
        
-       
-       
-        
         if self.first == True:
             self.l_first = data.position[0]
             self.r_first = data.position[1]

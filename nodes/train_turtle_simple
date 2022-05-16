@@ -28,11 +28,11 @@ class Simple_Turtle():
         self.ltheta = 0.
         self.rtheta = 0.
         
-        self.lvel = 6.05  #3.0303
-        self.rvel = 6.05  #3.03     
+        self.lvel = 3.03 #6.05  #3.0303
+        self.rvel = 3.03 #6.05  #3.03     
         
-        self.lcmd = 6.05  #3.0303
-        self.rcmd = 6.05  #3.0303
+        self.lcmd = 3.03 #6.05  #3.0303
+        self.rcmd = 3.03 #6.05  #3.0303
 
         self.encoder_sub =  rospy.Subscriber('/sensor_data', SensorData, self.encoder_callback)
         self.cmd_sub = rospy.Subscriber('/wheel_cmd', WheelCommands, self.cmd_callback)
@@ -46,6 +46,9 @@ class Simple_Turtle():
         
         
         self.first = True
+        self.first_j = True
+
+        
         
         if self.basis == 'fourier':
             self.koopman = Turtle_Koop_Vel(self.dt, 4, 2, self.ltheta, self.rtheta, self.lvel, self.rvel, self.lcmd, self.rcmd)
@@ -55,6 +58,9 @@ class Simple_Turtle():
         
         self.l_first = 0.
         self.r_first = 0.
+        
+        self.l_first_j = 0.
+        self.r_first_j = 0.    
         
         self.iteration = 0
         
@@ -68,20 +74,20 @@ class Simple_Turtle():
         self.rvel = data.velocity[1]
         
         if self.lvel<1.:
-            self.lvel = 6.05 #3.0303
+            self.lvel = 3.03 #6.06 #3.0303
         if self.rvel<1.:
-            self.rvel = 6.05  #3.0303
+            self.rvel = 3.03 #6.06  #3.0303
         
         self.data_lv_pub.publish(self.lvel)
         self.data_rv_pub.publish(self.rvel)  
        
-        if self.first == True:
-            self.l_first = data.position[0]
-            self.r_first = data.position[1]
-            self.first = False
+        if self.first_j == True:
+            self.l_first_j = data.position[0]
+            self.r_first_j = data.position[1]
+            self.first_j = False
         
-        self.data_l_pub.publish(data.position[0]-self.l_first)
-        self.data_r_pub.publish(data.position[1]-self.r_first)
+        self.data_l_pub.publish(data.position[0]-self.l_first_j)
+        self.data_r_pub.publish(data.position[1]-self.r_first_j)
 
         
         # print(self.lvel)
@@ -95,7 +101,7 @@ class Simple_Turtle():
         """
         
         t = Twist()
-        t.linear.x = 0.22
+        t.linear.x = 0.1
         t.linear.y = 0.
         t.linear.z = 0.
         
@@ -113,10 +119,10 @@ class Simple_Turtle():
         self.rtheta = data.right_encoder  
 
         
-        # if self.first == True:
-        #     self.l_first = self.ltheta
-        #     self.r_first = self.rtheta
-        #     self.first = False
+        if self.first == True:
+            self.l_first = self.ltheta
+            self.r_first = self.rtheta
+            self.first = False
         
         # print("right angle: ", (self.ltheta - self.l_first)*self.encoder_ticks_to_rad)
         # print("left angle: ", (self.rtheta - self.r_first)*self.encoder_ticks_to_rad)
@@ -125,8 +131,8 @@ class Simple_Turtle():
         # self.data_r_pub.publish((self.rtheta - self.r_first)*self.encoder_ticks_to_rad)
         
         self.iteration+=1
-        print('iteration: ', self.iteration)
-        self.koopman.train_model((self.ltheta - self.l_first)*self.encoder_ticks_to_rad, (self.rtheta - self.r_first)*self.encoder_ticks_to_rad, self.lvel, self.rvel, self.lcmd*self.motor_cmd_to_radsec, self.rcmd*self.motor_cmd_to_radsec)
+        # print('iteration: ', self.iteration)
+        self.koopman.train_model((self.ltheta - self.l_first)*self.encoder_ticks_to_rad, (self.rtheta - self.r_first)*self.encoder_ticks_to_rad, self.lvel, self.rvel, self.lcmd, self.rcmd)
         self.koopman.calculateK()
         
 
@@ -137,13 +143,20 @@ class Simple_Turtle():
         Args:
             data (WheelCommands): input commands to system
         """
+        int_cmd_left = data.left_velocity
+        int_cmd_right = data.right_velocity
         
-        self.lcmd = float(data.left_velocity)
-        self.rcmd = float(data.right_velocity)
+        # if int_cmd_left == 0:
+        #     int_cmd_left = 126
+            
+        # if int_cmd_right == 0:
+        #     int_cmd_right = 126   
         
+        self.lcmd = float(int_cmd_left) *self.motor_cmd_to_radsec
+        self.rcmd = float(int_cmd_right) *self.motor_cmd_to_radsec
         
-        print('rcmd: ', self.rcmd*self.motor_cmd_to_radsec)
-        print('lcmd: ', self.lcmd*self.motor_cmd_to_radsec)
+        print('rcmd: ', self.rcmd)
+        print('lcmd: ', self.lcmd)
         
         
         

@@ -165,6 +165,7 @@ catkin_install_python(PROGRAMS
     nodes/train_turtle_simple
     nodes/train_turtle_simple_ticks_cmd
     nodes/train_turtle_ground_straight
+    nodes/train_turtle_ground_straight_mono
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 #   scripts/my_python_script

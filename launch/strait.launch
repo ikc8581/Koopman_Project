@@ -6,10 +6,10 @@
 
     <include file="$(find apriltag_ros)/launch/continuous_detection.launch" />
 
-    <node pkg="cartpole" type="rsense_data" name="rsense_data" >     
+    <node pkg="cartpole" type="rsense_data" name="rsense_data" output="screen">     
     </node>
 
-    <node pkg="cartpole" type="train_turtle_ground_straight" name="train_turtle_ground_straight" output="screen">    
-    </node>
+    <!-- <node pkg="cartpole" type="train_turtle_ground_straight" name="train_turtle_ground_straight" output="screen">    
+    </node> -->
     
 </launch>

@@ -1525,3 +1525,137 @@ class Turtle_Koop_X_Xdot_Poly3():
         K_reduced = self.K[:6,:]
         print('K reduced : ',  repr(K_reduced))     
 
+ 
+class Turtle_Koop_X_Xdot_Poly3_Theta_Input():
+    def __init__(self,dt=0.0,x_state=4,u_state=2,x_curr = 0.0,xdot_curr=0.0,  lv_curr = 0.0, rv_curr = 0.0, ul_curr = 0.0, ur_curr = 0.0):
+        """Turtlebot Koopman training class using polynomial basis functions
+
+        Args:
+            dt (float): sampling time Defaults to 0.
+            x_state (float): number of state observations
+            u_state: number of input observtations
+            x_curr: xposition in meters
+            xdot_curr: x velocity in meter/s
+            lv_curr(float): current levt wheel velocity
+            rv_curr(float): current right wheel velocity
+            ur_curr (float): current right wheel angle input
+            ul_curr (float): current left wheel angle input
+        """
+        
+        self.dt = dt
+        
+        self.state_obs = x_state+7
+        self.u_obs = u_state
+        self.total_obs = self.u_obs + self.state_obs
+        
+        self.A = np.zeros([self.total_obs,self.total_obs])
+        self.G = np.zeros([self.total_obs,self.total_obs])
+        self.K = np.zeros([self.total_obs,self.total_obs])
+        
+        self.x_curr = x_curr
+        self.x_old = x_curr
+        
+        self.xdot_curr = xdot_curr
+        self.xdot_old = xdot_curr        
+        
+        self.lv_curr = lv_curr
+        self.rv_curr = rv_curr
+        self.lv_old = lv_curr
+        self.rv_old = rv_curr
+        
+        self.ul_curr = ul_curr
+        self.ur_curr = ur_curr
+        self.ul_old = ul_curr
+        self.ur_old = ur_curr
+        
+        self.divider = 1
+
+
+    def train_model(self,x, xdot, lvel, rvel, ul, ur):
+        
+        """train model parameters using Koopman
+
+        Args:
+            x: x linear position
+            xdot: xdot linear velocity
+            lvel: left wheel velocity
+            rvel: right wheel velocity
+            ul: updated left wheel angle
+            ur: updated right wheel angle
+            
+        Returns:
+            None
+        """
+
+        self.ul_old = self.ul_curr
+        self.ur_old = self.ur_curr
+        self.lv_old = self.lv_curr
+        self.rv_old = self.rv_curr
+        
+        self.x_old = self.x_curr
+        self.xdot_old = self.xdot_curr
+        
+        self.x_curr = x
+        self.xdot_curr = xdot
+        
+ 
+        
+        self.lv_curr = lvel
+        self.rv_curr = rvel
+        
+        self.ul_curr = ul
+        self.ur_curr = ur
+        
+        psix_old = self.zee_x(self.x_old, self.xdot_old,self.lv_old,self.rv_old) #This is an array
+        psix_curr = self.zee_x(self.x_curr,self.xdot_curr,self.lv_curr, self.rv_curr)
+        
+        psiu_old = self.zee_u(self.ul_old, self.ur_old)
+        psiu_curr = self.zee_u(self.ul_curr, self.ur_curr)
+
+        koop_old = np.concatenate((psix_old, psiu_old))
+        koop_curr = np.concatenate((psix_curr, psiu_curr))
+        
+        # print(koop_curr.shape)
+        # print(koop_old.shape)
+        print('polynomial...')
+        
+        self.A += np.outer(koop_curr,koop_old) / self.divider 
+        self.G += np.outer(koop_old,koop_old) / self.divider               
+             
+        self.divider+=1
+
+
+    def zee_x(self,x, xdot, lvel, rvel):
+        """Compute state observation parameters
+
+        Args:
+            ltheta: left wheel angle
+            rtheta: right wheel angle 
+            ul: left wheel command
+            ur: right wheel command
+        """
+        
+        return np.array([x, xdot, lvel, rvel, 1., xdot**2, lvel**2, rvel**2, xdot*lvel, xdot*rvel,lvel*rvel])
+      
+    def zee_u(self,ul, ur):
+        """compute control input observation parameters
+
+        Args:
+            ul (float): left wheel angle
+            ur (float): left wheel angle
+        """
+        
+        return np.array([ul, ur])
+
+        
+
+    def calculateK(self):
+        """
+        K matrix calculation (continuous)
+        
+        """
+  
+        self.K =  np.dot(self.A,np.linalg.pinv(self.G))
+
+        K_reduced = self.K[:6,:]
+        print('K reduced : ',  repr(K_reduced))     

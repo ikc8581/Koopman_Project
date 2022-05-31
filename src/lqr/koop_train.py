@@ -1644,7 +1644,7 @@ class Turtle_Koop_X_Xdot_Poly3_Theta_Input():
             ul (float): left wheel angle
             ur (float): left wheel angle
         """
-        
+        print('ul ur ', ul, ur)
         return np.array([ul, ur])
 
         

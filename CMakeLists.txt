@@ -162,11 +162,13 @@ catkin_install_python(PROGRAMS
     nodes/teleop_force
     nodes/koopman_train
     nodes/rsense_data
+    nodes/rsense_data_xy
     nodes/train_turtle_simple
     nodes/train_turtle_simple_ticks_cmd
     nodes/train_turtle_ground_straight
     nodes/train_turtle_ground_straight_reverse
     nodes/train_turtle_ground_straight_reverse_theta_in 
+    nodes/train_turtle_ground_straight_theta_in_xy
     nodes/train_turtle_ground_straight_mono
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
@@ -213,3 +215,11 @@ catkin_install_python(PROGRAMS
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+install(PROGRAMS
+#   # myfile1
+  devel_isolated/_setup_util.py
+  devel_isolated/env.sh
+      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
+)

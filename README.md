@@ -4,7 +4,7 @@
 
 This repository documents the Northwestern ME499 project that I undertook exploring the implementation of a Koopman Operators based approach to model the odometry of differential drive robots. The robot used for this project was a burger-type turtlebot, though the algorithmic principles applied here could be implemented on any differential-drive wheeled robot. 
 
-# Introduction
+## Introduction
 
 Koopman operators can be implemented in robotics active learning scenarios for the identification of a system. A Koopman operator model can then be used in tandem with system inputs to propagate state observations through time. A Koopman model in a mathematical sense models a finite dimensional system in infinite dimensions, though it can be approximated, as is done in this paper, using finite dimensional basis functions that are differentiable. Using a data-driven, least squares approach with pseudoinverse operations, these matrices constructed with these basis functions can be used to construct an approximate Koopman model by observing the system inputs and states over time. 
 
@@ -24,6 +24,8 @@ In addition to ROS Noetic and this particular ROS package, several other package
 
 * Low level control of the turtlebot was accomplished using code developed for a previous course at Northwestern:
 `git clone https://github.com/ME495-Navigation/slam-project-ikc8581.git`
+\
+`git clone https://github.com/ME495-Navigation/nuturtlebot_msgs.git`
 
 To compile the workspace, be sure to run :
 `catkin_make_isolated`
@@ -87,6 +89,14 @@ For the two dimensional variant, the same turtlebot setup commands are required.
 * Run the turtlebot koopman node:
 `rosrun cartpole train_turtle_ground_straight_reverse_theta_in_xy`
 
+### Data processing scripts
+
+Data was processed using scripts, examples of which can be found in the /scripts folder. Camera, gazebo, and robot odometry data was collected using a command similar to the following:
+\
+`rostopic echo -p /x_data  > 06_07_x.csv`
+\
+This echos an individual topic into a csv file, whose data can then be extracted and plotted in Pyton. 
+
 # Methods
 
 ### Cartpole Koopman Model
@@ -101,17 +111,35 @@ Gazebo setup:
 ### Stationary Turtlebot 
 
 The turtlebot was mounted on a platform, and the following basis function set was used to compute the Koopman operator:
-`[left_wheel_angle right_wheel_angle left_wheel_velocity right_wheel_velocity]`
+\
+`[left_wheel_angle right_wheel_angle left_wheel_velocity right_wheel_velocity 1.0 sin(left_wheel_angle) cos(left_wheel_angle) 1. sin(right_wheel_angle) cos(right_wheel_angle) left_wheel_cmd right_wheel_cmd]`
 
+### 1D Moving Turtlebot
 
+The turtlebot was placed on the ground and driven in a one dimensional path. A realsense camera was mounted overhead to compute the position and iterpolate the velocity of the robot using an AprilTag. A capture of the setup was shown earlier in this document. The basis functions used for this computation were:
+\
+`[x xdot left_wheel_velocity right_wheel_velocity 1.0 xdot**2, left_wheel_velocity**2 right_wheel_velocity**2 xdot*left_wheel_velocity  xdot*right_wheel_velocity left_wheel_velocity*right_wheel_velocity left_wheel_angle right_wheel_angle]`
+\
+Of note, it was found that polynomial based basis function sets and angle as inputs estimated the x position of the robot with better accuracy. In the results section, camera position, Koopman position, and encoder-based odometry position were compared.
+
+### 2D Moving Turtlebot
+
+The two dimensional case implemented a similar setup and algorithm to the 1D case, except in two dimensions. The basis function set that was used was as follows:
+\
+`[x y xdot ydot left_wheel_velocity right_wheel_velocity 1.0 xdot**2 ydot**2 left_wheel_velocity**2 right_wheel_velocity xdot*left_wheel_velocity xdot*right_wheel_velocity ydot*left_wheel_velocity ydot*right_wheel_velocity left_wheel_velocity*right_wheel_velocity xdot*ydot]`
+
+The resultant Koopman operator, the camera-based AprilTag position, and the encoder-based odometry position were compared.
 
 # Results
 
--insert plot ofs of propagated cartpole
+The cartpole system  controller was computed and was balanced using the nominal and Koopman based model. This can be run using the aforementioned commands
+
+Cartpole state results:
+\
 Position:
 \
 <img src="images/x.png" height="600" width="900">
-
+\
 Linear Velocity:
 \
 <img src="images/xdot.png" height="600" width="900">
@@ -119,11 +147,11 @@ Linear Velocity:
 Pole Angle:
 \
 <img src="images/theta.png" height="600" width="900">
-
+\
 Pole Angular Velocity:
 \
 <img src="images/thetadot.png" height="600" width="900">
-
+\
 
 
 -Stationary turtlebot:
@@ -131,15 +159,15 @@ Pole Angular Velocity:
 Left wheel angle:
 \
 <img src="images/left.png" height="600" width="900">
-
+\
 right wheel angle:
 \
 <img src="images/right.png" height="600" width="900">
-
+\
 left wheel velocity:
 \
 <img src="images/left_vel.png" height="600" width="900">
-
+\
 Right wheel velocity:
 \
 <img src="images/right_vel.png" height="600" width="900">
@@ -151,17 +179,26 @@ Right wheel velocity:
 \
 <img src="images/x_linear.png" height="600" width="900">
 \
-In a singular dimension, the turtlebopt was driven forward and in reverse for training. This resulted in the plot attached in this section. It was found that X position could be predicted, though it did not significantly outperform the encoder estimate. 
-
--Two dimensional turtlebot
-
+In a singular dimension, the turtlebopt was driven forward and in reverse for training. This resulted in the plot attached in this section. It was found that X position could be predicted, though it did not significantly outperform the encoder estimate. Velocity state observables were not predicted  well.
+\
+\
+-Two dimensional turtlebot:
+The two dimensional Koopman odometry implementation was able to approximate X and Y position, well, though the velocity based states did not predict well. 
+\
 <img src="images/x_2d.png" height="600" width="900">
 <img src="images/y_2d.png" height="600" width="900">
-
+\
+\
+Another trial set:
+\
+<img src="images/x_2da.png" height="600" width="900">
+<img src="images/y_2da.png" height="600" width="900">
+\
 
 # Conclusion and Next Steps
 
-
-
--higher order polynomials
--debug why states other than position do not perform well
+In conclusion, the turtlebot odometry was successfully approximated using Koopman operators. The eventual basis function set that was used was based on the state observables of position and their 1st order derivatives. The inputs considered were the observed encodered wheel angles. 
+\
+In spite of the robot position being successfully interpreted, the velocity state observables were found to be inaccurate with the basis function set currently used. Further investigation should be done into this by modifying training profiles, and possibly increasing the polynomial order. Currently, the polynomial order used was a 1st order polynomial. Higher order polynomials may improve prediction accuracy. Different basic functions should also be investigated and evaluated for improved performance.
+\
+The frequency of the triangle wave of position estimates slowly became out of phase with the turtlebot odometry and camera position estimation. This suggests that further investigation should be done into the timing scheme currently used in the data collection and state propagation scheme used. 

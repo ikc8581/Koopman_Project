@@ -4,6 +4,7 @@ https://pythonexamples.org/python-if-not/
 https://python-control.readthedocs.io/en/latest/generated/control.lqr.html
 https://github.com/i-abr/mpc-koopman
 https://github.com/i-abr/active-learning-koopman
+https://github.com/tonylitianyu/Data-Driven-Control-Koopman
 https://github.com/Raihan-Seraj/Control-of-Cartpole/blob/master/src/cartpole_learn.py
 https://danielpiedrahita.wordpress.com/portfolio/cart-pole-control/
 https://www.ashwinnarayan.com/post/cartpole-dynamics/

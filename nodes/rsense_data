@@ -21,7 +21,7 @@ class Cam():
         self.data_odom_pub = rospy.Publisher('/x_odom_data', Data, queue_size=10000)
         self.data_vel_odom_pub = rospy.Publisher('/xdot_odom_data', Data, queue_size=10000)
 
-        self.timer_data = rospy.Timer(rospy.Duration(1./280), self.timer_data_callback)
+        self.timer_data = rospy.Timer(rospy.Duration(1./310), self.timer_data_callback)
 
         self.x = 0.
         self.x_old = 0.
@@ -39,8 +39,6 @@ class Cam():
         self.first_odom = True
         
         
-        
-
     def timer_callback(self,event):
         """
         Callback for getting camera data
@@ -73,10 +71,9 @@ class Cam():
 
         print('camx:', self.x)
         print('camxdot:', self.xdot)
+        
         print('xodom: ', self.x_odom)
         print('xdot_odom: ', self.xdot_odom)
-        
-  
         
     def timer_data_callback(self, event):
         """X data publisher 

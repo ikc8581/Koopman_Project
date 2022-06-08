@@ -69,7 +69,9 @@ The scripts folder contains postprocessing scripts used in the plotting of koopm
 ### Moving Turtlebot Odometry
 
 <img src="images/IMG-3571.jpg" height="900" width="900">
--append video of moving demo
+
+-Sample video:
+https://drive.google.com/file/d/1hF0ggJGrtKowYGfbqxbM3KK5MIIVBbqa/view?usp=sharing
 
 #### 1 Dimensional Turtlebot Odometry Estimation
 
@@ -151,7 +153,7 @@ Pole Angle:
 Pole Angular Velocity:
 \
 <img src="images/thetadot.png" height="600" width="900">
-\
+
 
 
 -Stationary turtlebot:
@@ -176,29 +178,29 @@ Right wheel velocity:
 -One dimensional turtlebot odometry:
 
 - X position:
-\
+
 <img src="images/x_linear.png" height="600" width="900">
-\
+
 In a singular dimension, the turtlebopt was driven forward and in reverse for training. This resulted in the plot attached in this section. It was found that X position could be predicted, though it did not significantly outperform the encoder estimate. Velocity state observables were not predicted  well.
-\
+
 \
 -Two dimensional turtlebot:
 The two dimensional Koopman odometry implementation was able to approximate X and Y position, well, though the velocity based states did not predict well. 
 \
 <img src="images/x_2d.png" height="600" width="900">
 <img src="images/y_2d.png" height="600" width="900">
-\
-\
+
 Another trial set:
-\
 <img src="images/x_2da.png" height="600" width="900">
 <img src="images/y_2da.png" height="600" width="900">
-\
+
 
 # Conclusion and Next Steps
 
 In conclusion, the turtlebot odometry was successfully approximated using Koopman operators. The eventual basis function set that was used was based on the state observables of position and their 1st order derivatives. The inputs considered were the observed encodered wheel angles. 
 \
 In spite of the robot position being successfully interpreted, the velocity state observables were found to be inaccurate with the basis function set currently used. Further investigation should be done into this by modifying training profiles, and possibly increasing the polynomial order. Currently, the polynomial order used was a 1st order polynomial. Higher order polynomials may improve prediction accuracy. Different basic functions should also be investigated and evaluated for improved performance.
+\
+Circular trajectory estimationg was attempted using the 1st order polynomial algorithm, however the resultant Koopman model did not perform well. Higher speeds were also found to be difficult to acquire a stable model for. Going forward, varying two dimensional trajectories, and training at higher speeds should both be explored in order to determine the limits of the algorithm in its current form. 
 \
 The frequency of the triangle wave of position estimates slowly became out of phase with the turtlebot odometry and camera position estimation. This suggests that further investigation should be done into the timing scheme currently used in the data collection and state propagation scheme used. 

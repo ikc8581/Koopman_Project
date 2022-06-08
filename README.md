@@ -8,7 +8,9 @@ This repository documents the Northwestern ME499 project that I undertook explor
 
 Koopman operators can be implemented in robotics active learning scenarios for the identification of a system. A Koopman operator model can then be used in tandem with system inputs to propagate state observations through time. A Koopman model in a mathematical sense models a finite dimensional system in infinite dimensions, though it can be approximated, as is done in this paper, using finite dimensional basis functions that are differentiable. Using a data-driven, least squares approach with pseudoinverse operations, these matrices constructed with these basis functions can be used to construct an approximate Koopman model by observing the system inputs and states over time. 
 
-Source: I. Abraham and T. D. Murphey, "Active Learning of Dynamics for Data-Driven Control Using Koopman Operators," in IEEE Transactions on Robotics, vol. 35, no. 5, pp. 1071-1083, Oct. 2019, doi: 10.1109/TRO.2019.2923880.
+Sources: I. Abraham and T. D. Murphey, "Active Learning of Dynamics for Data-Driven Control Using Koopman Operators," in IEEE Transactions on Robotics, vol. 35, no. 5, pp. 1071-1083, Oct. 2019, doi: 10.1109/TRO.2019.2923880.
+\
+Abraham, Ian, Gerardo De La Torre, and Todd D. Murphey. "Model-based control using Koopman operators." arXiv preprint arXiv:1709.01568 (2017).
 
 ## Other dependencies
 
@@ -41,7 +43,7 @@ There are supporting python library files that were written to abstract the math
 ### Cartpole demos
 
 
-The early part of the project was spent implementing a Koopman model on a simplem system in order to get acquainted with the approach the algorithm uses. The classic cartpole penduluum system was selected, and implemented in both a control balancing context, and a pure system modeling and propagation through time context. Gazebo was used as a simulator. obot URDF and gazebo files were developed in the urdf folder. In order to run these experiments, the following can be run after cloning this repo into a workspace:
+The early part of the project was spent implementing a Koopman model on a simplem system in order to get acquainted with the approach the algorithm uses. The classic cartpole penduluum system was selected, and implemented in both a control balancing context, and a pure system modeling and propagation through time context. Gazebo was used as a simulator. Robot URDF and gazebo files were developed in the urdf folder. In order to run these experiments, the following can be run after cloning this repo into a workspace:
 
 * `roslaunch cartpole cartpole_slide_drive.launch mode:=<mode>`
 
@@ -68,6 +70,8 @@ The scripts folder contains postprocessing scripts used in the plotting of koopm
 
 ### Moving Turtlebot Odometry
 
+A sample snapshot of the testing setup, with the camera overhead, can be seen in the screenshot below:
+\
 <img src="images/IMG-3571.jpg" height="900" width="900">
 
 -Sample video:
@@ -75,7 +79,7 @@ https://drive.google.com/file/d/1hF0ggJGrtKowYGfbqxbM3KK5MIIVBbqa/view?usp=shari
 
 #### 1 Dimensional Turtlebot Odometry Estimation
 
-In order to run the  1 dimensional turtlebot odometry estimation model, 3 terminal are required:
+In order to run the  1 dimensional turtlebot odometry estimation model, 3 terminal windows are required:
 * Start the turtlebot with the same commands as the previous section
 * Run the realsense module:
 `roslaunch cartpole strait.launch`
@@ -84,7 +88,7 @@ In order to run the  1 dimensional turtlebot odometry estimation model, 3 termin
 
 #### 2 Dimensional Turtlebot Odometry Estimation
 
-For the two dimensional variant, the same turtlebot setup commands are required.
+For the two dimensional variant, the same turtlebot setup commands from before are required.
 * Run the realsense module:
 `roslaunch cartpole strait_xy.launch`
 
@@ -118,7 +122,7 @@ The turtlebot was mounted on a platform, and the following basis function set wa
 
 ### 1D Moving Turtlebot
 
-The turtlebot was placed on the ground and driven in a one dimensional path. A realsense camera was mounted overhead to compute the position and iterpolate the velocity of the robot using an AprilTag. A capture of the setup was shown earlier in this document. The basis functions used for this computation were:
+The turtlebot was placed on the ground and driven in a one dimensional path. A realsense camera was mounted overhead to compute the position and iterpolate the velocity of the robot using an AprilTag. A capture of the setup was shown earlier in this document. The state basis functions used for this computation were:
 \
 `[x xdot left_wheel_velocity right_wheel_velocity 1.0 xdot**2, left_wheel_velocity**2 right_wheel_velocity**2 xdot*left_wheel_velocity  xdot*right_wheel_velocity left_wheel_velocity*right_wheel_velocity left_wheel_angle right_wheel_angle]`
 \

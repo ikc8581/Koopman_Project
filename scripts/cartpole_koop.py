@@ -41,10 +41,18 @@ with open('04_28xdot_a.csv','r',) as file:
         xdot.append(float(row[0]))
 
 def psi_x(x):
-    print(x)
+    
+    """Compute state basis functions
+    Args:
+        x: state observables
+    """
     return np.array([x[0], x[1], x[2], x[3], np.sin(x[2]), np.cos(x[2]),1])
 
 def psi_u(u, theta):
+    """Compute input basis functions
+    Args:
+        u: input observables
+    """
     
     return np.array([u, u*np.cos(theta)])
 

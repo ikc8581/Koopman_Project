@@ -12,10 +12,18 @@ import matplotlib.pyplot as plt
 
 
 def psi_x(x):
+    """Compute state basis functions
+    Args:
+        x: state observables
+    """
     print(x)
     return np.array([x[0], x[1],x[2],x[3], 1., np.sin(x[0]), np.cos(x[0]), 1., np.sin(x[1]), np.cos(x[1]) ])
 
 def psi_u(u):
+    """Compute input basis functions
+    Args:
+        u: input observables
+    """
     
     return np.array([u[0], u[1]])
 

@@ -169,6 +169,7 @@ catkin_install_python(PROGRAMS
     nodes/train_turtle_ground_straight_reverse
     nodes/train_turtle_ground_straight_reverse_theta_in 
     nodes/train_turtle_ground_straight_theta_in_xy
+    nodes/train_turtle_ground_straight_theta_in_xy_circle
     nodes/train_turtle_ground_straight_mono
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

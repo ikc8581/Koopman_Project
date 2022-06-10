@@ -136,9 +136,16 @@ The two dimensional case implemented a similar setup and algorithm to the 1D cas
 
 The resultant Koopman operator, the camera-based AprilTag position, and the encoder-based odometry position were compared.
 
+### 2D Arc Circle Turtlebot Trajectory
+\
+A two dimensional trajectory was also computed along an arc circle trajectory. The basis functions used for this test run were:
+`[x y xdot ydot left_wheel_velocity right_wheel_velocity 1.0 xdot**2 ydot**2 left_wheel_velocity**2 right_wheel_velocity xdot*left_wheel_velocity xdot*right_wheel_velocity ydot*left_wheel_velocity ydot*right_wheel_velocity left_wheel_velocity*right_wheel_velocity xdot*ydot x**2 y**2 x*y x*lvel x*rvel y*lvel y*rvel (x**2)*(y**2)]`
+
 # Results
 
-The cartpole system  controller was computed and was balanced using the nominal and Koopman based model. This can be run using the aforementioned commands
+The cartpole system LQR controller was computed and was balanced using the nominal and Koopman based model. This can be run using the aforementioned commands.
+\
+The cartpole Koopman system was compared against Gazebo outputted data. The Turtlebot test cases were compared against the encoder readings in the stationary case, and against camera and odometry data in the moving cases.
 
 Cartpole state results:
 \
@@ -193,11 +200,18 @@ The two dimensional Koopman odometry implementation was able to approximate X an
 \
 <img src="images/x_2d.png" height="600" width="900">
 <img src="images/y_2d.png" height="600" width="900">
-
-Another trial set:
+\
+-Another trial set:
 <img src="images/x_2da.png" height="600" width="900">
 <img src="images/y_2da.png" height="600" width="900">
-
+\
+-A slip test case can be shown below. The slip scenario was created by taping the wheels of the turtlebot to create additional slip. It implemented a linear path in two dimensions. Unfortunately the slip scenario created induced lateral slipping rather than forward/reverse slip. This resulted in a Koopman model that could not capture the entirety of the necessary states to predict odometry.
+<img src="images/x_slip.png" height="600" width="900">
+<img src="images/y_slip.png" height="600" width="900">
+\
+-A test case was also run with along an arc circle trajectory:
+<img src="images/X.png" height="600" width="900">
+<img src="images/Y.png" height="600" width="900">
 
 # Conclusion and Next Steps
 
@@ -205,6 +219,6 @@ In conclusion, the turtlebot odometry was successfully approximated using Koopma
 \
 In spite of the robot position being successfully interpreted, the velocity state observables were found to be inaccurate with the basis function set currently used. Further investigation should be done into this by modifying training profiles, and possibly increasing the polynomial order. Currently, the polynomial order used was a 1st order polynomial. Higher order polynomials may improve prediction accuracy. Different basic functions should also be investigated and evaluated for improved performance.
 \
-Circular trajectory estimationg was attempted using the 1st order polynomial algorithm, however the resultant Koopman model did not perform well. Higher speeds were also found to be difficult to acquire a stable model for. Going forward, varying two dimensional trajectories, and training at higher speeds should both be explored in order to determine the limits of the algorithm in its current form. 
+Higher speeds were also found to be difficult to acquire a stable model for. Going forward, varying two dimensional trajectories, and training at higher speeds should both be explored in order to determine the limits of the algorithm in its current form. 
 \
 The frequency of the triangle wave of position estimates slowly became out of phase with the turtlebot odometry and camera position estimation. This suggests that further investigation should be done into the timing scheme currently used in the data collection and state propagation scheme used. 

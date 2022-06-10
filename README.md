@@ -222,3 +222,5 @@ In spite of the robot position being successfully interpreted, the velocity stat
 Higher speeds were also found to be difficult to acquire a stable model for. Going forward, varying two dimensional trajectories, and training at higher speeds should both be explored in order to determine the limits of the algorithm in its current form. 
 \
 The frequency of the triangle wave of position estimates slowly became out of phase with the turtlebot odometry and camera position estimation. This suggests that further investigation should be done into the timing scheme currently used in the data collection and state propagation scheme used. 
+\
+Artificial was inputted into the system by taping the wheels for one test case. However, the slipping motion occurred along the vertical axis of the turtlebot, affecting the theta orientation and not the x,y position of the robot. This rendered the slip test ineffective in its current form. A better form of the test could be run in the future by incorporating the theta state of the robot into the Koopman estimation algorithm, and added into the odometry estimate. 

@@ -43,7 +43,7 @@ There are supporting python library files that were written to abstract the math
 ### Cartpole demos
 
 
-The early part of the project was spent implementing a Koopman model on a simplem system in order to get acquainted with the approach the algorithm uses. The classic cartpole penduluum system was selected, and implemented in both a control balancing context, and a pure system modeling and propagation through time context. Gazebo was used as a simulator. Robot URDF and gazebo files were developed in the urdf folder. In order to run these experiments, the following can be run after cloning this repo into a workspace:
+The early part of the project was spent implementing a Koopman model on a simple system in order to get acquainted with the approach the algorithm uses. The classic cartpole penduluum system was selected, and implemented in both a control balancing context, and a pure system modeling and propagation through time context. Gazebo was used as a simulator. Robot URDF and gazebo files were developed in the urdf folder. In order to run these experiments, the following can be run after cloning this repo into a workspace:
 
 * `roslaunch cartpole cartpole_slide_drive.launch mode:=<mode>`
 
@@ -132,14 +132,14 @@ Of note, it was found that polynomial based basis function sets and angle as inp
 
 The two dimensional case implemented a similar setup and algorithm to the 1D case, except in two dimensions. The basis function set that was used was as follows:
 \
-`[x y xdot ydot left_wheel_velocity right_wheel_velocity 1.0 xdot**2 ydot**2 left_wheel_velocity**2 right_wheel_velocity xdot*left_wheel_velocity xdot*right_wheel_velocity ydot*left_wheel_velocity ydot*right_wheel_velocity left_wheel_velocity*right_wheel_velocity xdot*ydot]`
+`[x y xdot ydot left_wheel_velocity right_wheel_velocity 1.0 xdot**2 ydot**2 left_wheel_velocity**2 right_wheel_velocity xdot*left_wheel_velocity xdot*right_wheel_velocity ydot*left_wheel_velocity ydot*right_wheel_velocity left_wheel_velocity*right_wheel_velocity xdot*ydot left_wheel_angle right_wheel_angle]`
 
 The resultant Koopman operator, the camera-based AprilTag position, and the encoder-based odometry position were compared.
 
 ### 2D Arc Circle Turtlebot Trajectory
 \
 A two dimensional trajectory was also computed along an arc circle trajectory. The basis functions used for this test run were:
-`[x y xdot ydot left_wheel_velocity right_wheel_velocity 1.0 xdot**2 ydot**2 left_wheel_velocity**2 right_wheel_velocity xdot*left_wheel_velocity xdot*right_wheel_velocity ydot*left_wheel_velocity ydot*right_wheel_velocity left_wheel_velocity*right_wheel_velocity xdot*ydot x**2 y**2 x*y x*lvel x*rvel y*lvel y*rvel (x**2)*(y**2)]`
+`[x y xdot ydot left_wheel_velocity right_wheel_velocity 1.0 xdot**2 ydot**2 left_wheel_velocity**2 right_wheel_velocity xdot*left_wheel_velocity xdot*right_wheel_velocity ydot*left_wheel_velocity ydot*right_wheel_velocity left_wheel_velocity*right_wheel_velocity xdot*ydot x**2 y**2 x*y x*lvel x*rvel y*lvel y*rvel (x**2)*(y**2) left_wheel_angle right_wheel_angle]`
 
 # Results
 
@@ -217,10 +217,10 @@ The two dimensional Koopman odometry implementation was able to approximate X an
 
 In conclusion, the turtlebot odometry was successfully approximated using Koopman operators. The eventual basis function set that was used was based on the state observables of position and their 1st order derivatives. The inputs considered were the observed encodered wheel angles. 
 \
-In spite of the robot position being successfully interpreted, the velocity state observables were found to be inaccurate with the basis function set currently used. Further investigation should be done into this by modifying training profiles, and possibly increasing the polynomial order. Currently, the polynomial order used was a 1st order polynomial. Higher order polynomials may improve prediction accuracy. Different basic functions should also be investigated and evaluated for improved performance.
+In spite of the robot position being successfully interpreted, the velocity state observables were found to be inaccurate with the basis function set currently used. Further investigation should be done into this by modifying training profiles, and possibly increasing the polynomial order. Currently, the polynomial order used was a 1st order polynomial for most of the trial cases aside from the arc circle scenario. Higher order polynomials may improve prediction accuracy. Different basis functions should also be investigated and evaluated for improved performance.
 \
 Higher speeds were also found to be difficult to acquire a stable model for. Going forward, varying two dimensional trajectories, and training at higher speeds should both be explored in order to determine the limits of the algorithm in its current form. 
 \
-The frequency of the triangle wave of position estimates slowly became out of phase with the turtlebot odometry and camera position estimation. This suggests that further investigation should be done into the timing scheme currently used in the data collection and state propagation scheme used. 
+The frequency of the triangle wave of position estimates  became out of phase with the turtlebot odometry and camera position estimation. This suggests that further investigation should be made into the timing scheme currently used in the data collection and state propagation model used. 
 \
-Artificial was inputted into the system by taping the wheels for one test case. However, the slipping motion occurred along the vertical axis of the turtlebot, affecting the theta orientation and not the x,y position of the robot. This rendered the slip test ineffective in its current form. A better form of the test could be run in the future by incorporating the theta state of the robot into the Koopman estimation algorithm, and added into the odometry estimate. 
+Artificial slip was inputted into the system by taping the wheels for one test case. However, the slipping motion occurred along the vertical axis of the turtlebot, affecting the theta orientation and not the x,y position of the robot. This rendered the slip test ineffective in its current form. A better form of the test could be run in the future by incorporating the theta state of the robot into the Koopman estimation algorithm, and added into the odometry estimate. 
